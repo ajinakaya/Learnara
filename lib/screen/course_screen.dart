@@ -120,19 +120,19 @@ class CourseScreen extends StatelessWidget {
                     _buildLessonItem(
                       title: 'Konnichiwa!',
                       description: 'Learn how to greet people for the first time',
-                      imagePath: 'assets/images/greeting.png',
+                      imagePath: 'assets/images/vector.jpg',
                     ),
                     const SizedBox(height: 16),
                     _buildLessonItem(
                       title: 'Saying your name',
                       description: 'Learn how to say name to introduced yourself',
-                      imagePath: 'assets/images/name.png',
+                      imagePath: 'assets/images/vector.jpg',
                     ),
                     const SizedBox(height: 16),
                     _buildLessonItem(
                       title: 'Introducing Yourself',
                       description: 'Learn how to greet and introduce yourself in Japanese',
-                      imagePath: 'assets/images/intro.png',
+                      imagePath: 'assets/images/vector.jpg',
                     ),
                   ],
                 ),

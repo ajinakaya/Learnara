@@ -6,7 +6,9 @@ class Profile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: const Text("Profile"),
         centerTitle: true,
       ),
@@ -14,7 +16,9 @@ class Profile extends StatelessWidget {
         child: Text(
           'Profile',
         ),
+
       ),
+
     );
   }
 }
