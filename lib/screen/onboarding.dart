@@ -10,18 +10,17 @@ class Onboarding extends StatefulWidget {
 
 class _OnboardingState extends State<Onboarding> {
   int _currentPage = 0;
-
-
-
-  final List<Map<String , String>>_OnboardingData =[
+  final List<Map<String, String>> _OnboardingData = [
     {
       "title": "Learn a new language",
-      "subtitle": "Discover the joy of learning with interactive lessons and practice.",
+      "subtitle":
+          "Discover the joy of learning with interactive lessons and practice.",
       "image": "assets/images/onboarding1.jpg",
     },
     {
       "title": "Track your progress",
-      "subtitle": "Keep an eye on your achievements and reach your goals faster.",
+      "subtitle":
+          "Keep an eye on your achievements and reach your goals faster.",
       "image": "assets/images/progress1.jpg",
     },
     {
@@ -31,15 +30,22 @@ class _OnboardingState extends State<Onboarding> {
     },
   ];
 
-  void _nextPage(){
-    if (_currentPage < _OnboardingData.length-1){
+  void _nextPage() {
+    if (_currentPage < _OnboardingData.length - 1) {
       setState(() {
         _currentPage++;
       });
-    }else{
+    } else {
       Navigator.of(context).pushNamed("/login");
     }
   }
+
+  void _goToPage(int page) {
+    setState(() {
+      _currentPage = page;
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +63,7 @@ class _OnboardingState extends State<Onboarding> {
               data["title"]!,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 29,
                 fontWeight: FontWeight.bold,
                 color: Colors.black87,
               ),
@@ -68,7 +74,7 @@ class _OnboardingState extends State<Onboarding> {
               data["subtitle"]!,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 14,
                 color: Colors.grey,
               ),
             ),
@@ -81,33 +87,39 @@ class _OnboardingState extends State<Onboarding> {
             const SizedBox(height: 40),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children:List.generate(
+              children: List.generate(
                 _OnboardingData.length,
-                    (index) => Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: _currentPage == index ? Colors.black : Colors.grey,
+                (index) => GestureDetector(
+                  onTap: () => _goToPage(index),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _currentPage == index ? Colors.black : Colors.grey,
+                    ),
                   ),
                 ),
               ),
             ),
-            const SizedBox(height:55),
+            const SizedBox(height: 55),
             ElevatedButton(
                 onPressed: _nextPage,
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16,horizontal:32),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                   backgroundColor: Colors.black.withOpacity(0.75),
-                  shape:RoundedRectangleBorder(
+                  shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  minimumSize: Size(double.infinity,20),
+                  minimumSize: Size(double.infinity, 20),
                 ),
                 child: Text(
-                  _currentPage < _OnboardingData.length -1 ? "Next": "Get Started",
-                  style: TextStyle(fontSize: 18,color: Colors.white),
+                  _currentPage < _OnboardingData.length - 1
+                      ? "Next"
+                      : "Get Started",
+                  style: TextStyle(fontSize: 18, color: Colors.white),
                 ))
           ],
         ),

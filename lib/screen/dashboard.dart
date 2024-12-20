@@ -44,7 +44,7 @@ class _DashbaordState extends State<Dashbaord> {
           type: BottomNavigationBarType.fixed,
           items: [
             BottomNavigationBarItem(
-              icon: const Icon(Icons.home),
+              icon: const Icon(Icons.home_filled),
               label: 'Home',
             ),
             BottomNavigationBarItem(
@@ -60,6 +60,7 @@ class _DashbaordState extends State<Dashbaord> {
               label: 'Profile',
             ),
           ],
+          backgroundColor: Colors.white,
           currentIndex: _selectIndex,
           selectedItemColor: Colors.black,
           unselectedItemColor: Colors.grey,

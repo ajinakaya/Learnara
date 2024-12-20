@@ -214,6 +214,7 @@ class HomeScreen extends StatelessWidget {
                     ],
                   ),
                 ),
+
                 const SizedBox(height: 12),
                 Text(
                   title,
@@ -329,7 +330,7 @@ class HomeScreen extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                         ),
                         child: const Text('Start',
-                          style: TextStyle(fontSize: 15, color: Colors.white
+                          style: TextStyle(fontSize: 13, color: Colors.white
                           ),
                         ),
                       ),

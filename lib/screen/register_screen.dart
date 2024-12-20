@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../cors/common/common_text_field.dart';
 
-
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -11,11 +10,11 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-
   // Controllers for text fields
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   final TextEditingController _fullnameController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
 
@@ -64,12 +63,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Form(
@@ -81,7 +78,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               Text(
                 'Welcome to Learnara',
                 style: TextStyle(
-                  fontSize: 32.0,
+                  fontSize: 30,
                   fontWeight: FontWeight.w600,
                   color: Colors.black87,
                 ),
@@ -108,9 +105,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   size: 22.0,
                 ),
                 hintText: "Fullname",
-                validator: (value) => value?.isEmpty ?? true
-                    ? 'Fullname is required'
-                    : null,
+                validator: (value) =>
+                    value?.isEmpty ?? true ? 'Fullname is required' : null,
               ),
               const SizedBox(height: 20), // Increased gap
 
@@ -146,9 +142,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   size: 22.0,
                 ),
                 hintText: 'Username',
-                validator: (value) => value?.isEmpty ?? true
-                    ? 'Username is required'
-                    : null,
+                validator: (value) =>
+                    value?.isEmpty ?? true ? 'Username is required' : null,
               ),
               const SizedBox(height: 20), // Increased gap
 
@@ -193,7 +188,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 suffixIcon: GestureDetector(
                   onTap: () {
                     setState(() {
-                      _obscureTextConfirmPassword = !_obscureTextConfirmPassword;
+                      _obscureTextConfirmPassword =
+                          !_obscureTextConfirmPassword;
                     });
                   },
                   child: Icon(
@@ -216,7 +212,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     'By signing you agree to our ',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 15.0,
+                      fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: Colors.grey,
                     ),
@@ -225,7 +221,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     'Terms of use',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 15.0,
+                      fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: Colors.grey,
                     ),
@@ -239,7 +235,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     'and ',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 15.0,
+                      fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: Colors.grey,
                     ),
@@ -248,7 +244,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     'Privacy notice',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 15.0,
+                      fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: Colors.grey,
                     ),
@@ -265,13 +261,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 20),
                     backgroundColor: Colors.black.withOpacity(0.75),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   onPressed: _submitForm,
                   child: const Text(
                     "Sign Up",
-                    style: TextStyle(fontSize: 20,color: Colors.white),
+                    style: TextStyle(fontSize: 18, color: Colors.white),
                   ),
                 ),
               ),
@@ -281,17 +277,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 children: [
                   Text(
                     "Already have an account? ",
-                    style: TextStyle(color: Colors.grey.shade800, fontSize: 15),
+                    style: TextStyle(color: Colors.grey.shade800, fontSize: 14),
                   ),
-                  InkWell(
+                  GestureDetector(
                     onTap: () {
-                      Navigator.of(context).pop();
+                      Navigator.of(context).pushReplacementNamed('/login');
                     },
-                    child: Text(
+                    child: const Text(
                       "Sign in",
                       style: TextStyle(
                         color: Colors.blue,
-                        fontSize: 15,
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

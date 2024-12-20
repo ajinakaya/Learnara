@@ -61,7 +61,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -115,8 +114,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     });
                   },
                   child: Icon(
-                    _obscureTextPassword ? Icons.visibility : Icons
-                        .visibility_off,
+                    _obscureTextPassword
+                        ? Icons.visibility
+                        : Icons.visibility_off,
                     size: 20.0,
                     color: Colors.black,
                   ),
@@ -172,7 +172,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: const Text(
                       "Sign up",
                       style: TextStyle(
-                          color: Colors.blue, fontWeight: FontWeight.bold),
+                          color: Colors.blue,
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
@@ -183,5 +185,4 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-  }
-
+}
