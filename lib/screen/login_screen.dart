@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:learnara/widget/common_text_field.dart';
+import 'package:learnara/cors/common/common_text_field.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../widget/common_text_field.dart';
+import '../cors/common/common_text_field.dart';
 
 
 class RegisterScreen extends StatefulWidget {

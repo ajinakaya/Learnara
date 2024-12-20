@@ -11,6 +11,8 @@ class Onboarding extends StatefulWidget {
 class _OnboardingState extends State<Onboarding> {
   int _currentPage = 0;
 
+
+
   final List<Map<String , String>>_OnboardingData =[
     {
       "title": "Learn a new language",
