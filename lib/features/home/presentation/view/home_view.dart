@@ -1,21 +1,21 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:learnara/screen/course_screen.dart';
-import 'package:learnara/screen/home_screen.dart';
+import 'package:learnara/features/home/presentation/view/bottom_view/dashboard_view.dart';
 import 'package:learnara/screen/profile.dart';
 import 'package:learnara/screen/progress_screen.dart';
 
-class Dashbaord extends StatefulWidget {
-  const Dashbaord({super.key});
+class HomeView extends StatefulWidget {
+  const HomeView({super.key});
 
   @override
-  State<Dashbaord> createState() => _DashbaordState();
+  State<HomeView> createState() => _HomeViewState();
 }
 
-class _DashbaordState extends State<Dashbaord> {
+class _HomeViewState extends State<HomeView> {
   int _selectIndex = 0;
   List<Widget> lstBottomScreen = [
-    const HomeScreen(),
+    const DashboardView(),
     const CourseScreen(),
     const ProgressScreen(),
     const Profile(),
