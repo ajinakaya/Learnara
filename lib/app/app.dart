@@ -1,31 +1,23 @@
-
 import 'package:flutter/material.dart';
-import 'package:learnara/screen/dashboard.dart';
-import 'package:learnara/screen/login_screen.dart';
-import 'package:learnara/screen/onboarding.dart';
-import 'package:learnara/screen/register_screen.dart';
-
-import 'cors/app_theme/app_theme.dart';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:learnara/app/di/di.dart';
+import 'package:learnara/core/theme/app_theme/app_theme.dart';
+import 'package:learnara/features/splash/presentation/view/splash_view.dart';
+import 'package:learnara/features/splash/presentation/view_model/splash_cubit.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return  MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/onboarding',
-      theme: getApplicationTheme(),
-      routes: {
-        '/onboarding':(context) => const Onboarding(),
-        '/login':(context) => const LoginScreen(),
-        '/register': (context) => const RegisterScreen(),
-        '/dashboard': (context) => const Dashbaord(),
-
-      },
-
-
+      title: 'Learnara',
+      theme: AppTheme.getApplicationTheme(),
+      home: BlocProvider.value(
+        value: getIt<SplashCubit>(),
+        child: SplashView(),
+      ),
     );
   }
 }
