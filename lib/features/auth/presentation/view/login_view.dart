@@ -1,22 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:learnara/cors/common/common_text_field.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:learnara/features/auth/presentation/view/register_view.dart';
+import 'package:learnara/features/auth/presentation/view_model/login/login_bloc.dart';
+import 'package:learnara/features/home/presentation/view/home_view.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+
+
+
+class LoginView extends StatefulWidget {
+  const LoginView({super.key});
+
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  _LoginViewState createState() => _LoginViewState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginViewState extends State<LoginView> {
   // Controllers for text fields
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   bool _obscureTextPassword = true;
-
-  final String storedEmail = "user@gmail.com";
-  final String storedPassword = "Password123";
 
   // Form key for validation
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -43,19 +47,21 @@ class _LoginScreenState extends State<LoginScreen> {
   // Function to handle login
   void _handleLogin() {
     if (_formKey.currentState?.validate() ?? false) {
-      final email = _emailController.text;
-      final password = _passwordController.text;
-
-      if (email == storedEmail && password == storedPassword) {
-        print("Login Successful!");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Login Successful!")),
+      if (_emailController.text == 'ajina@gmail.com' &&
+          _passwordController.text == 'ajina123') {
+        context.read<LoginBloc>().add(
+          NavigateHomeScreenEvent(
+            destination: const HomeView(),
+            context: context,
+          ),
         );
-        Navigator.pushReplacementNamed(context, '/dashboard');
       } else {
-        print("Incorrect email or password!");
+        // Show error message if login fails
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Incorrect email or password")),
+          const SnackBar(
+            content: Text('Invalid email or password'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -81,44 +87,47 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Email Field using CommonTextField
+              // Email Field
               const Text(
                 "Email",
                 style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
               ),
               const SizedBox(height: 8),
-              CommonTextField(
+              TextFormField(
                 controller: _emailController,
-                hintText: 'Email Address',
-                prefixIcon: const Icon(Icons.email, color: Colors.black),
+                decoration: InputDecoration(
+                  hintText: 'Email Address',
+                  prefixIcon: const Icon(Icons.email, color: Colors.black),
+                ),
                 validator: _validateEmail,
               ),
               const SizedBox(height: 16),
 
-              // Password Field using CommonTextField
+              // Password Field
               const Text(
                 "Password",
                 style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
               ),
               const SizedBox(height: 8),
-              CommonTextField(
+              TextFormField(
                 controller: _passwordController,
                 obscureText: _obscureTextPassword,
-                hintText: 'Password',
-                prefixIcon: const Icon(Icons.lock, color: Colors.black),
-                suffixIcon: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      // Toggle the visibility
-                      _obscureTextPassword = !_obscureTextPassword;
-                    });
-                  },
-                  child: Icon(
-                    _obscureTextPassword
-                        ? Icons.visibility
-                        : Icons.visibility_off,
-                    size: 20.0,
-                    color: Colors.black,
+                decoration: InputDecoration(
+                  hintText: 'Password',
+                  prefixIcon: const Icon(Icons.lock, color: Colors.black),
+                  suffixIcon: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _obscureTextPassword = !_obscureTextPassword;
+                      });
+                    },
+                    child: Icon(
+                      _obscureTextPassword
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      size: 20.0,
+                      color: Colors.black,
+                    ),
                   ),
                 ),
                 validator: _validatePassword,
@@ -163,18 +172,27 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   Text(
                     "Don't have an account? ",
-                    style: TextStyle(color: Colors.grey.shade800),
+                    style: TextStyle(
+                      color: Colors.grey.shade800,
+                      fontSize: 13,
+                    ),
                   ),
                   GestureDetector(
                     onTap: () {
-                      Navigator.of(context).pushNamed("/register");
+                      context.read<LoginBloc>().add(
+                        NavigateRegisterScreenEvent(
+                          destination: const RegisterView(),
+                          context: context,
+                        ),
+                      );
                     },
                     child: const Text(
                       "Sign up",
                       style: TextStyle(
-                          color: Colors.blue,
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold),
+                        color: Colors.blue,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
