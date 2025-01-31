@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:learnara/features/auth/presentation/view/login_view.dart';
 
 class Onboarding extends StatefulWidget {
   const Onboarding({super.key});
@@ -10,7 +11,7 @@ class Onboarding extends StatefulWidget {
 
 class _OnboardingState extends State<Onboarding> {
   int _currentPage = 0;
-  final List<Map<String, String>> _OnboardingData = [
+  final List<Map<String, String>> _onboardingData = [
     {
       "title": "Learn a new language",
       "subtitle":
@@ -31,12 +32,15 @@ class _OnboardingState extends State<Onboarding> {
   ];
 
   void _nextPage() {
-    if (_currentPage < _OnboardingData.length - 1) {
+    if (_currentPage < _onboardingData.length - 1) {
       setState(() {
         _currentPage++;
       });
     } else {
-      Navigator.of(context).pushNamed("/login");
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => LoginView()),
+      );
     }
   }
 
@@ -49,7 +53,7 @@ class _OnboardingState extends State<Onboarding> {
 
   @override
   Widget build(BuildContext context) {
-    final data = _OnboardingData[_currentPage];
+    final data = _onboardingData[_currentPage];
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -88,7 +92,7 @@ class _OnboardingState extends State<Onboarding> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(
-                _OnboardingData.length,
+                _onboardingData.length,
                 (index) => GestureDetector(
                   onTap: () => _goToPage(index),
                   child: Container(
@@ -116,7 +120,7 @@ class _OnboardingState extends State<Onboarding> {
                   minimumSize: Size(double.infinity, 20),
                 ),
                 child: Text(
-                  _currentPage < _OnboardingData.length - 1
+                  _currentPage < _onboardingData.length - 1
                       ? "Next"
                       : "Get Started",
                   style: TextStyle(fontSize: 18, color: Colors.white),
