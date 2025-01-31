@@ -167,7 +167,7 @@ class _LoginViewState extends State<LoginView> {
                     onTap: () {
                       context.read<LoginBloc>().add(
                         NavigateRegisterScreenEvent(
-                          destination: const RegisterView(),
+                          destination:  RegisterView(),
                           context: context,
                         ),
                       );

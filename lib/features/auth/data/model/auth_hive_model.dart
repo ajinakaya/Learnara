@@ -40,7 +40,7 @@ class AuthHiveModel extends Equatable {
   // From Entity
   factory AuthHiveModel.fromEntity(AuthEntity entity) {
     return AuthHiveModel(
-      userId: entity.userId,
+      userId: entity.id,
       fullname: entity.fullname,
       email: entity.email,
       username: entity.username,
@@ -51,7 +51,7 @@ class AuthHiveModel extends Equatable {
   // To Entity
   AuthEntity toEntity() {
     return AuthEntity(
-      userId: userId,
+      id: userId,
       fullname: fullname,
       email: email,
       username: username,
