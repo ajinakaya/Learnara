@@ -2,7 +2,8 @@ import 'package:get_it/get_it.dart';
 import 'package:learnara/core/network/hive_service.dart';
 import 'package:learnara/features/auth/data/data_source/local_data_source/auth_local_datasource.dart';
 import 'package:learnara/features/auth/data/repository/auth_local_repository/auth_local_respository.dart';
-import 'package:learnara/features/auth/domain/usecase/register_user_usecase.dart';
+import 'package:learnara/features/auth/domain/usecase/login_usecase.dart';
+import 'package:learnara/features/auth/domain/usecase/register_usecase.dart';
 import 'package:learnara/features/auth/presentation/view_model/login/login_bloc.dart';
 import 'package:learnara/features/auth/presentation/view_model/signup/register_bloc.dart';
 import 'package:learnara/features/home/presentation/view_model/home_cubit.dart';
@@ -11,13 +12,12 @@ import 'package:learnara/features/splash/presentation/view_model/splash_cubit.da
 final getIt = GetIt.instance;
 
 Future<void> initDependencies() async {
-  // First initialize hive service
+  // initialize hive service
   await _initHiveService();
-
   await _initHomeDependencies();
-  _initRegisterDependencies();
+  await _initRegisterDependencies();
   await _initLoginDependencies();
-  await _initSplashScreenDependencies();
+  _initSplashDependencies();
 }
 
 _initHiveService() {
@@ -56,16 +56,29 @@ _initHomeDependencies() async {
 }
 
 _initLoginDependencies() async {
+
+  getIt.registerLazySingleton<LoginUseCase>(
+        () => LoginUseCase(
+      getIt<AuthLocalRepository>(),
+    ),
+  );
+
   getIt.registerFactory<LoginBloc>(
         () => LoginBloc(
       registerBloc: getIt<RegisterBloc>(),
       homeCubit: getIt<HomeCubit>(),
+      loginUseCase: getIt<LoginUseCase>(),
     ),
   );
 }
 
-_initSplashScreenDependencies() async {
-  getIt.registerFactory<SplashCubit>(
-        () => SplashCubit(getIt<LoginBloc>()),
-  );
+// ====================================splashscreen=============================
+void _initSplashDependencies() {
+  getIt.registerFactory<SplashCubit>(() => SplashCubit());
 }
+
+
+
+
+
+

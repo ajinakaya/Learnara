@@ -2,7 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:learnara/core/common/snack_bar/my_snackbar.dart';
-import 'package:learnara/features/auth/domain/usecase/register_user_usecase.dart';
+import 'package:learnara/features/auth/domain/usecase/register_usecase.dart';
 
 
 part 'register_event.dart';

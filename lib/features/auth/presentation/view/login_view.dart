@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:learnara/features/auth/presentation/view/register_view.dart';
 import 'package:learnara/features/auth/presentation/view_model/login/login_bloc.dart';
-import 'package:learnara/features/home/presentation/view/home_view.dart';
-
-
 
 
 class LoginView extends StatefulWidget {
@@ -44,28 +41,6 @@ class _LoginViewState extends State<LoginView> {
     return null;
   }
 
-  // Function to handle login
-  void _handleLogin() {
-    if (_formKey.currentState?.validate() ?? false) {
-      if (_emailController.text == 'ajina@gmail.com' &&
-          _passwordController.text == 'ajina123') {
-        context.read<LoginBloc>().add(
-          NavigateHomeScreenEvent(
-            destination: const HomeView(),
-            context: context,
-          ),
-        );
-      } else {
-        // Show error message if login fails
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Invalid email or password'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -158,7 +133,18 @@ class _LoginViewState extends State<LoginView> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onPressed: _handleLogin,
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    context.read<LoginBloc>().add(
+                      LoginUserEvent(
+                        context: context,
+                        email: _emailController.text,
+                        password: _passwordController.text,
+                      ),
+                    );
+
+                  }
+                },
                 child: const Text(
                   "Log In",
                   style: TextStyle(fontSize: 18, color: Colors.white),
