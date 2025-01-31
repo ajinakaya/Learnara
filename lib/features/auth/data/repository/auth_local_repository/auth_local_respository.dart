@@ -29,7 +29,7 @@ class AuthLocalRepository implements IAuthRepository {
       String password,
       ) async {
     try {
-      final token = await _authLocalDataSource.loginuser(email, password);
+      final token = await _authLocalDataSource.loginUser(email, password);
       return Right(token);
     } catch (e) {
       return Left(LocalDatabaseFailure(message: e.toString()));
@@ -39,7 +39,7 @@ class AuthLocalRepository implements IAuthRepository {
   @override
   Future<Either<Failure, void>> registerUser(AuthEntity user) async {
     try {
-      return Right(_authLocalDataSource.registeruser(user));
+      return Right(_authLocalDataSource.registerUser(user));
     } catch (e) {
       return Left(LocalDatabaseFailure(message: e.toString()));
     }
