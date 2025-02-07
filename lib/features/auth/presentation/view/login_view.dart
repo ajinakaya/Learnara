@@ -9,10 +9,10 @@ class LoginView extends StatefulWidget {
 
 
   @override
-  _LoginViewState createState() => _LoginViewState();
+  LoginViewState createState() => LoginViewState();
 }
 
-class _LoginViewState extends State<LoginView> {
+class LoginViewState extends State<LoginView> {
   // Controllers for text fields
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -23,7 +23,7 @@ class _LoginViewState extends State<LoginView> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   // Email validation function
-  String? _validateEmail(String? value) {
+  String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
       return 'Email is required';
     }
@@ -34,7 +34,7 @@ class _LoginViewState extends State<LoginView> {
   }
 
   // Password validation function
-  String? _validatePassword(String? value) {
+  String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Password is required';
     }
@@ -74,7 +74,7 @@ class _LoginViewState extends State<LoginView> {
                   hintText: 'Email Address',
                   prefixIcon: const Icon(Icons.email, color: Colors.black),
                 ),
-                validator: _validateEmail,
+                validator: validateEmail,
               ),
               const SizedBox(height: 16),
 
@@ -105,7 +105,7 @@ class _LoginViewState extends State<LoginView> {
                     ),
                   ),
                 ),
-                validator: _validatePassword,
+                validator: validatePassword,
               ),
               const SizedBox(height: 16),
 

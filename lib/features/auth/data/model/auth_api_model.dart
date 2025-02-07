@@ -54,6 +54,7 @@ class AuthApiModel extends Equatable {
       image: entity.image,
       role: entity.role,
       password: entity.password,
+      id: entity.id,
     );
   }
 
