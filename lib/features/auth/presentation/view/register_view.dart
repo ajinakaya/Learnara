@@ -11,21 +11,21 @@ class RegisterView extends StatefulWidget {
   RegisterView({Key? key}) : super(key: key);
 
   @override
-  State<RegisterView> createState() => _RegisterViewState();
+  RegisterViewState createState() => RegisterViewState();
 }
 
-class _RegisterViewState extends State<RegisterView> {
-  final TextEditingController _emailController = TextEditingController();
+class RegisterViewState extends State<RegisterView> {
+  final TextEditingController emailController = TextEditingController();
 
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
 
-  final TextEditingController _fullnameController = TextEditingController();
+  final TextEditingController fullnameController = TextEditingController();
 
-  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController usernameController = TextEditingController();
 
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   final ValueNotifier<bool> _obscureTextPassword = ValueNotifier(true);
 
@@ -64,7 +64,7 @@ class _RegisterViewState extends State<RegisterView> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Form(
-            key: _formKey,
+            key: formKey,
             child: BlocListener<RegisterBloc, RegisterState>(
               listener: (context, state) {},
               child: Column(
@@ -225,7 +225,7 @@ class _RegisterViewState extends State<RegisterView> {
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
-                    controller: _fullnameController,
+                    controller: fullnameController,
                     decoration: const InputDecoration(
                       prefixIcon: Icon(Icons.person, color: Colors.black),
                       hintText: "Fullname",
@@ -235,7 +235,7 @@ class _RegisterViewState extends State<RegisterView> {
                   ),
                   const SizedBox(height: 20),
                   TextFormField(
-                    controller: _emailController,
+                    controller: emailController,
                     decoration: const InputDecoration(
                       prefixIcon: Icon(Icons.email, color: Colors.black),
                       hintText: "Email",
@@ -252,7 +252,7 @@ class _RegisterViewState extends State<RegisterView> {
                   ),
                   const SizedBox(height: 20),
                   TextFormField(
-                    controller: _usernameController,
+                    controller: usernameController,
                     decoration: const InputDecoration(
                       prefixIcon: Icon(Icons.verified_user, color: Colors.black),
                       hintText: 'Username',
@@ -265,7 +265,7 @@ class _RegisterViewState extends State<RegisterView> {
                     valueListenable: _obscureTextPassword,
                     builder: (context, obscureText, child) {
                       return TextFormField(
-                        controller: _passwordController,
+                        controller: passwordController,
                         obscureText: obscureText,
                         decoration: InputDecoration(
                           prefixIcon: const Icon(Icons.lock, color: Colors.black),
@@ -299,7 +299,7 @@ class _RegisterViewState extends State<RegisterView> {
                     valueListenable: _obscureTextConfirmPassword,
                     builder: (context, obscureText, child) {
                       return TextFormField(
-                        controller: _confirmPasswordController,
+                        controller: confirmPasswordController,
                         obscureText: obscureText,
                         decoration: InputDecoration(
                           prefixIcon: const Icon(Icons.lock_clock, color: Colors.black),
@@ -317,7 +317,7 @@ class _RegisterViewState extends State<RegisterView> {
                           if (value == null || value.isEmpty) {
                             return 'Confirm password is required';
                           }
-                          if (value != _passwordController.text) {
+                          if (value != passwordController.text) {
                             return 'Passwords do not match';
                           }
                           return null;
@@ -357,14 +357,14 @@ class _RegisterViewState extends State<RegisterView> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        if (_formKey.currentState!.validate()) {
+                        if (formKey.currentState!.validate()) {
                           context.read<RegisterBloc>().add(
                             RegisterUser(
                               context: context,
-                              email: _emailController.text,
-                              password: _passwordController.text,
-                              username: _usernameController.text,
-                              fullname: _fullnameController.text,
+                              email: emailController.text,
+                              password: passwordController.text,
+                              username: usernameController.text,
+                              fullname: fullnameController.text,
                             ),
                           );
                         }
