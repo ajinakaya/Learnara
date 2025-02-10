@@ -14,7 +14,7 @@ class CourseScreen extends StatelessWidget {
         title: Row(
           children: [
             Image.asset(
-              'assets/images/logo.jpg',
+              'assets/images/logo.png',
               height: 50,
               width: 60,
             ),
