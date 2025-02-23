@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:learnara/features/auth/presentation/view/register_view.dart';
 import 'package:learnara/features/auth/presentation/view_model/login/login_bloc.dart';
+import 'package:learnara/features/langauge/domain/entity/language_entity.dart';
 
 
 class LoginView extends StatefulWidget {
-  const LoginView({super.key});
+  final PreferredLanguageEntity? selectedLanguage;
+  const LoginView({Key? key, this.selectedLanguage}) : super(key: key);
 
 
   @override

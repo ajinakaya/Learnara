@@ -38,3 +38,9 @@ class LoginUserEvent extends LoginEvent {
     required this.password,
   });
 }
+
+class LogoutUserEvent extends LoginEvent {
+  final BuildContext context;
+
+  const LogoutUserEvent({required this.context});
+}

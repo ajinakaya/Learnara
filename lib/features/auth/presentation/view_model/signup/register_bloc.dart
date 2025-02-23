@@ -6,10 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:learnara/core/common/snack_bar/my_snackbar.dart';
 import 'package:learnara/features/auth/domain/usecase/register_usecase.dart';
 import 'package:learnara/features/auth/domain/usecase/upload_image_usecase.dart';
-import 'package:learnara/features/auth/presentation/view_model/login/login_bloc.dart';
-
-
-
 part 'register_event.dart';
 part 'register_state.dart';
 
