@@ -1,7 +1,73 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
+import 'dart:math';
 
-class DashboardView extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:learnara/app/constants/api_endpoint.dart';
+import 'package:learnara/features/Activitytype/presentation/view/audio.dart';
+import 'package:learnara/features/Activitytype/presentation/view/flashcard.dart';
+import 'package:learnara/features/Activitytype/presentation/view/quiz.dart';
+import 'package:learnara/features/Activitytype/presentation/view_model/activity/activity_bloc.dart';
+import 'package:learnara/features/courses/presentation/view/course_screen.dart';
+import 'package:learnara/features/goals/presentation/view/goal.dart';
+import 'package:learnara/features/langauge/presentation/view_model/language/language_bloc.dart';
+import 'package:learnara/features/langauge/domain/entity/language_entity.dart';
+import 'package:learnara/features/langauge/domain/entity/user_language_entity.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+import 'package:sensors_plus/sensors_plus.dart';
+
+
+
+class Course {
+  final int id;
+  final String title;
+  final List<String> level;
+  final String description;
+  final String thumbnail;
+
+  Course({
+    required this.id,
+    required this.title,
+    required this.level,
+    required this.description,
+    required this.thumbnail,
+  });
+
+  factory Course.fromJson(Map<String, dynamic> json) {
+    return Course(
+      id: json['id'] ?? 0,
+      title: json['title'] ?? 'Untitled Course',
+      level: (json['level'] as List?)?.map((e) => e.toString()).toList() ??
+          ['N/A'],
+      description: json['description'] ?? 'No description available',
+      thumbnail: json['thumbnail'] ?? 'assets/images/japan img.jpeg',
+    );
+  }
+}
+
+class DashboardView extends StatefulWidget {
   const DashboardView({super.key});
+
+  @override
+  _DashboardViewState createState() => _DashboardViewState();
+}
+
+class _DashboardViewState extends State<DashboardView> {
+  PreferredLanguageEntity? _selectedLanguage;
+  List<Course> _courses = [];
+  bool _isLoading = false;
+  String _errorMessage = '';
+  late StreamSubscription<AccelerometerEvent> _accelerometerSubscription;
+  AccelerometerEvent? _lastEvent;
+  static const double shakeThreshold = 15.0;
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<LanguageBloc>().add(LoadLanguages());
+    
 
   @override
   Widget build(BuildContext context) {
@@ -14,44 +80,76 @@ class DashboardView extends StatelessWidget {
         title: Row(
           children: [
             Image.asset(
-              'assets/images/logo.jpg',
+              'assets/images/logo.png',
               height: 50,
               width: 60,
             ),
             const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade300),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'Japanese',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(width: 7),
-                  Icon(Icons.translate, color: Colors.grey.shade600, size: 14),
+            BlocConsumer<LanguageBloc, LanguageState>(
+              listener: (context, state) {
+                if (state.languages.isNotEmpty) {
+                  final availableLanguages = state.languages;
+                  final selectedLanguage = state.userLanguagePreference != null
+                      ? availableLanguages.firstWhere(
+                          (lang) =>
+                              lang.languageName ==
+                              state.userLanguagePreference!.languageName,
+                          orElse: () => availableLanguages.first,
+                        )
+                      : availableLanguages.first;
 
-                  Icon(Icons.keyboard_arrow_down, color: Colors.grey.shade600),
-                ],
-              ),
+                  if (_courses.isEmpty) {
+                    _fetchCourses(selectedLanguage.languageId.toString());
+                  }
+                }
+              },
+              builder: (context, state) {
+                // This is purely for building the UI
+                if (state.languages.isEmpty) {
+                  return Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 1, vertical: 4),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text('Loading Languages...'),
+                  );
+                }
+
+                final availableLanguages = state.languages;
+                _selectedLanguage = state.userLanguagePreference != null
+                    ? availableLanguages.firstWhere(
+                        (lang) =>
+                            lang.languageName ==
+                            state.userLanguagePreference!.languageName,
+                        orElse: () => availableLanguages.first,
+                      )
+                    : availableLanguages.first;
+
+                return _buildLanguageDropdown(context, availableLanguages);
+              },
             ),
           ],
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.track_changes, color: Colors.black),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => GoalScreen()),
+              );
+            },
           ),
           IconButton(
             icon: const Icon(Icons.notifications_none_sharp, color: Colors.black),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => GoalScreen()),
+              );
+            },
           ),
         ],
       ),
@@ -68,16 +166,24 @@ class DashboardView extends StatelessWidget {
                     border: Border.all(color: Colors.grey.shade300),
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: Image.asset(
-                    'assets/images/Japan Flag.jpeg',
-                    width: 24,
-                    height: 16,
-                  ),
+                  child: _selectedLanguage != null
+                      ? Image.network(
+                          '${ApiEndpoints.baseUrl}${_selectedLanguage?.languageImage ?? ''}',
+                          width: 24,
+                          height: 16,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Image.asset(
+                            'assets/images/default_flag.png',
+                            width: 24,
+                            height: 16,
+                          ),
+                        )
+                      : const SizedBox.shrink(),
                 ),
                 const SizedBox(width: 8),
-                const Text(
-                  'Japanese courses',
-                  style: TextStyle(
+                Text(
+                  '${_selectedLanguage?.languageName ?? "Japanese"} Courses',
+                  style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -85,7 +191,7 @@ class DashboardView extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 30),
-            _buildDailyPracticeSection(),
+            _buildDailyPracticeSection(context),
             const SizedBox(height: 30),
             const Text(
               'All Courses',
@@ -97,30 +203,35 @@ class DashboardView extends StatelessWidget {
             const Divider(),
             const SizedBox(height: 8),
             Expanded(
-              child: ListView(
-                children: [
-                  _buildCourseCard(
-                    'Complete Japanese',
-                    'Level A1-B2',
-                    'Beginner, intermediate and advanced lessons',
-                    'assets/images/japan img.jpeg',
-                  ),
-                  const SizedBox(height: 16),
-                  _buildCourseCard(
-                    'Katakana',
-                    'Level A1-B2',
-                    'Beginner, intermediate and advanced lessons',
-                    'assets/images/japan img1.jpeg',
-                  ),
-                  const SizedBox(height: 16),
-                  _buildCourseCard(
-                    'Japanese for Travel',
-                    'Level A1-B2',
-                    'Beginner, intermediate and advanced lessons',
-                    'assets/images/japan img2.jpeg',
-                  ),
-                ],
-              ),
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _errorMessage.isNotEmpty
+                      ? Center(
+                          child: Text(
+                            _errorMessage,
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        )
+                      : _courses.isEmpty
+                          ? const Center(
+                              child: Text(
+                                  'No courses available for this language'),
+                            )
+                          : ListView.builder(
+                              itemCount: _courses.length,
+                              itemBuilder: (context, index) {
+                                final course = _courses[index];
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 16.0),
+                                  child: _buildCourseCard(
+                                    course.title,
+                                    course.level.join('-'),
+                                    course.description,
+                                    'assets/images/japan img1.jpeg',
+                                  ),
+                                );
+                              },
+                            ),
             ),
           ],
         ),
@@ -128,7 +239,68 @@ class DashboardView extends StatelessWidget {
     );
   }
 
-  Widget _buildDailyPracticeSection() {
+  Widget _buildLanguageDropdown(
+      BuildContext context, List<PreferredLanguageEntity> availableLanguages) {
+    return Container(
+      width: 120,
+      height: 36,
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<PreferredLanguageEntity>(
+          value: _selectedLanguage,
+          icon: const Icon(Icons.keyboard_arrow_down, size: 18),
+          items: availableLanguages.map((language) {
+            return DropdownMenuItem<PreferredLanguageEntity>(
+              value: language,
+              child: Row(
+                children: [
+                  Image.network(
+                    '${ApiEndpoints.baseUrl}${language.languageImage}',
+                    width: 16,
+                    height: 12,
+                    errorBuilder: (context, error, stackTrace) => Image.asset(
+                        'assets/images/default_flag.png',
+                        width: 16,
+                        height: 12),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    language.languageName,
+                    style: const TextStyle(fontSize: 10),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+          onChanged: (newLanguage) {
+            if (newLanguage != null) {
+              context
+                  .read<LanguageBloc>()
+                  .add(SetUserLanguage(UserLanguagePreferenceEntity(
+                    id: newLanguage.languageId,
+                    userId: context
+                            .read<LanguageBloc>()
+                            .state
+                            .userLanguagePreference
+                            ?.userId ??
+                        'default_user',
+                    languageName: newLanguage.languageName,
+                    languageImage: newLanguage.languageImage,
+                  )));
+
+              _fetchCourses(newLanguage.languageId.toString());
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDailyPracticeSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -146,19 +318,33 @@ class DashboardView extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             children: [
               _buildPracticeCard(
-                title: 'Audio challenge',
+                context: context,
+                title: 'Audio Learning',
                 points: '40',
                 duration: '4 Mins 20 min',
                 color: const Color(0xFFFFF3E9),
                 imagePath: 'assets/images/Headphone.png',
+                activityType: ActivityType.audio,
               ),
               const SizedBox(width: 12),
               _buildPracticeCard(
-                title: 'Speaking challenge',
+                context: context,
+                title: 'Flashcard',
+                points: '25',
+                duration: '3 Mins 20 min',
+                color: const Color(0xFFE9FFF3),
+                imagePath: 'assets/images/flashcard1.png',
+                activityType: ActivityType.flashcard,
+              ),
+              const SizedBox(width: 12),
+              _buildPracticeCard(
+                context: context,
+                title: 'Quiz',
                 points: '30',
                 duration: '5 Mins 20 min',
                 color: const Color(0xFFE5F3FF),
-                imagePath: 'assets/images/Headphone.png',
+                imagePath: 'assets/images/quiz1.png',
+                activityType: ActivityType.quiz,
               ),
             ],
           ),
@@ -168,93 +354,136 @@ class DashboardView extends StatelessWidget {
   }
 
   Widget _buildPracticeCard({
+    required BuildContext context,
     required String title,
     required String points,
     required String duration,
     required Color color,
     required String imagePath,
+    required ActivityType activityType,
   }) {
-    return Container(
-      width: 280,
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            top: 16,
-            left: 16,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.8),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.star_rounded,
-                        size: 16,
-                        color: Colors.amber,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '$points Points',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
+    return GestureDetector(
+      onTap: () {
+        switch (activityType) {
+          case ActivityType.audio:
+            context.read<ActivityBloc>().add(FetchAudioActivitiesEvent());
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const AudioLearningPage(),
+              ),
+            );
+            break;
+          case ActivityType.quiz:
+            context.read<ActivityBloc>().add(FetchQuizzesEvent());
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const QuizPage(),
+              ),
+            );
+            break;
+          case ActivityType.flashcard:
+            context.read<ActivityBloc>().add(FetchFlashcardsEvent());
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const FlashcardPage(),
+              ),
+            );
+            break;
+        }
+      },
+      child: Container(
+        width: 280,
+        margin: const EdgeInsets.only(bottom: 8),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Stack(
+          children: [
+            Positioned(
+              top: 16,
+              left: 16,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.8),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.star_rounded,
+                          size: 16,
+                          color: Colors.amber,
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 4),
+                        Text(
+                          '$points Points',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-
-                const SizedBox(height: 12),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                  const SizedBox(height: 12),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  duration,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.black54,
+                  const SizedBox(height: 4),
+                  Text(
+                    duration,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.black54,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Positioned(
-            right: 0,
-            bottom: 0,
-            child: Image.asset(
-              imagePath,
-              width: 120,
-              height: 120,
-              fit: BoxFit.contain,
+            Positioned(
+              right: 0,
+              bottom: 0,
+              child: Image.asset(
+                imagePath,
+                width: 120,
+                height: 120,
+                fit: BoxFit.contain,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildCourseCard(String title, String level, String description, String imagePath) {
+  Widget _buildCourseCard(
+      String title, String level, String description, String imagePath) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey.shade400),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade200,
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -273,7 +502,7 @@ class DashboardView extends StatelessWidget {
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) => Container(
                     width: 120,
-                    height: 100,
+                    height: 150,
                     color: Colors.grey.shade200,
                     child: const Icon(Icons.image, color: Colors.grey),
                   ),
@@ -281,61 +510,83 @@ class DashboardView extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Image.asset(
-                          'assets/images/Japan Flag.jpeg',
-                          width: 25,
-                          height: 15,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          level,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Image.asset(
+                            'assets/images/Japan Flag.jpeg',
+                            width: 25,
+                            height: 15,
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                          const SizedBox(width: 8),
+                          Text(
+                            level,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey.shade700,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      description,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black54.withOpacity(0.75),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                        ),
-                        child: const Text('Start',
-                          style: TextStyle(fontSize: 13, color: Colors.white
-                          ),
+                      const SizedBox(height: 8),
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 8),
+                      Text(
+                        description,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade600,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 12),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            // Fetch Flashcards and Navigate to Flashcard Page
+                            context.read<ActivityBloc>().add(FetchFlashcardsEvent());
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const CourseScreen(),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black87,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 10,
+                            ),
+                          ),
+                          child: const Text(
+                            'Start Course',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -346,3 +597,6 @@ class DashboardView extends StatelessWidget {
     );
   }
 }
+
+// Enum to define activity types
+enum ActivityType { audio, quiz, flashcard }
