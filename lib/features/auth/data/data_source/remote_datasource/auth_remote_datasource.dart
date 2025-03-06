@@ -3,12 +3,16 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:learnara/app/constants/api_endpoint.dart';
+import 'package:learnara/app/share_pref/token_share_pref.dart';
 import 'package:learnara/features/auth/data/data_source/auth_data_source.dart';
+import 'package:learnara/features/auth/data/model/auth_api_model.dart';
 import 'package:learnara/features/auth/domain/entity/auth_entity.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class AuthRemoteDatasource implements IAuthDataSource {
   final Dio _dio;
+
   AuthRemoteDatasource(this._dio);
 
 
@@ -43,7 +47,7 @@ class AuthRemoteDatasource implements IAuthDataSource {
           "fullname": user.fullname,
           "email": user.email,
           "image": user.image,
-          "role":user.role,
+          "role": user.role,
           "username": user.username,
           "password": user.password,
           "confirmpassword": user.password,
@@ -66,7 +70,9 @@ class AuthRemoteDatasource implements IAuthDataSource {
   @override
   Future<String> uploadProfilePicture(File file) async {
     try {
-      String fileName = file.path.split('/').last;
+      String fileName = file.path
+          .split('/')
+          .last;
 
 
       FormData formData = FormData.fromMap({
@@ -116,13 +122,40 @@ class AuthRemoteDatasource implements IAuthDataSource {
       throw Exception("Upload failed: ${e.toString()}");
     }
   }
+
   @override
-  Future<AuthEntity> getCurrentUser() {
-    // TODO: implement getCurrentUser
-    throw UnimplementedError();
+  Future<AuthEntity> getCurrentUser() async {
+    try {
+
+      final sharedPreferences = await SharedPreferences.getInstance();
+      final tokenPrefs = TokenSharedPrefs(sharedPreferences);
+      final tokenResult = await tokenPrefs.getToken();
+      final token = tokenResult.fold(
+            (failure) =>
+        throw Exception("Failed to get token: ${failure.message}"),
+            (token) => token,
+      );
+
+      Response response = await _dio.get(
+        ApiEndpoints.profile,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        AuthApiModel apiModel = AuthApiModel.fromJson(response.data);
+        return apiModel.toEntity();
+      } else {
+        throw Exception(
+            "Failed to get current user: ${response.statusMessage}");
+      }
+    } on DioException catch (e) {
+      throw Exception("Dio Error: ${e.message}");
+    } catch (e) {
+      throw Exception("Error: ${e.toString()}");
+    }
   }
 }
-
-
-
-

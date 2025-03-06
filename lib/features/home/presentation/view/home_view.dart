@@ -1,8 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:learnara/screen/course_screen.dart';
+import 'package:learnara/features/courses/presentation/view/course_screen.dart';
+import 'package:learnara/features/goals/presentation/view/goal.dart';
 import 'package:learnara/features/home/presentation/view/bottom_view/dashboard_view.dart';
-import 'package:learnara/screen/profile.dart';
+import 'package:learnara/features/profile/presentation/view/profile.dart';
 import 'package:learnara/screen/progress_screen.dart';
 
 class HomeView extends StatefulWidget {
@@ -16,7 +17,7 @@ class _HomeViewState extends State<HomeView> {
   int _selectIndex = 0;
   List<Widget> lstBottomScreen = [
     const DashboardView(),
-    const CourseScreen(),
+     const CourseScreen(),
     const ProgressScreen(),
     const Profile(),
   ];
