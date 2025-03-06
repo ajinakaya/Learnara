@@ -21,7 +21,7 @@ class FlashcardEntity extends Equatable {
     required this.cards,
     this.difficulty = 'beginner',
     required this.order,
-    required this.completionCriteria,
+    required this.completionCriteria, 
   });
 
   @override
