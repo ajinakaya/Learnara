@@ -67,7 +67,95 @@ class _DashboardViewState extends State<DashboardView> {
   void initState() {
     super.initState();
     context.read<LanguageBloc>().add(LoadLanguages());
-    
+    _startShakeListener();
+  }
+
+  Future<void> _fetchCourses(String languageId) async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
+
+    try {
+      final baseUrl = ApiEndpoints.baseUrl.replaceAll(RegExp(r'/+$'), '');
+      final url = Uri.parse('$baseUrl/course/course?languageId=$languageId');
+
+      print('Fetching Courses URL: $url');
+      print('Language ID: $languageId');
+
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      );
+
+      print('Response Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> courseData = json.decode(response.body);
+        setState(() {
+          _courses =
+              courseData.map((course) => Course.fromJson(course)).toList();
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _errorMessage = 'Failed to load courses: ${response.statusCode}';
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'An error occurred: ${e.toString()}';
+        _isLoading = false;
+      });
+      print('Course Fetch Error: $e');
+    }
+  }
+
+  void _startShakeListener() {
+    _accelerometerSubscription = accelerometerEventStream().listen((event) {
+      if (_lastEvent != null) {
+        double deltaX = event.x - _lastEvent!.x;
+        double deltaY = event.y - _lastEvent!.y;
+        double deltaZ = event.z - _lastEvent!.z;
+
+        double acceleration =
+        sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
+
+        if (acceleration > shakeThreshold) {
+          _onShakeDetected();
+        }
+      }
+      _lastEvent = event;
+    });
+  }
+
+  void _onShakeDetected() {
+    // Handle the shake event here
+    print('Shake detected!');
+
+    // Example: Refresh courses when phone is shaken
+    if (_selectedLanguage != null) {
+      _fetchCourses(_selectedLanguage!.languageId.toString());
+
+      // Show a quick feedback to user
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Refreshing courses...'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _accelerometerSubscription.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
