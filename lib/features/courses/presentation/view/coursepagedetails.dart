@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:learnara/features/Activitytype/domain/entity/flashcard/flashcard_entity.dart';
+import 'package:proximity_sensor/proximity_sensor.dart';
+import 'dart:async';
 
 class FlashcardDetailPage extends StatefulWidget {
   final FlashcardEntity flashcard;
@@ -12,11 +14,33 @@ class FlashcardDetailPage extends StatefulWidget {
 
 class _FlashcardDetailPageState extends State<FlashcardDetailPage> {
   bool _isFlipped = false;
+  StreamSubscription<int>? _proximitySubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _startProximitySensor();
+  }
+
+  void _startProximitySensor() {
+    _proximitySubscription = ProximitySensor.events.listen((int event) {
+      bool isNear = event == 1; // Convert int to bool
+      if (isNear) {
+        _toggleCard();
+      }
+    });
+  }
 
   void _toggleCard() {
     setState(() {
       _isFlipped = !_isFlipped;
     });
+  }
+
+  @override
+  void dispose() {
+    _proximitySubscription?.cancel();
+    super.dispose();
   }
 
   @override
@@ -28,7 +52,7 @@ class _FlashcardDetailPageState extends State<FlashcardDetailPage> {
       );
     }
 
-    final card = widget.flashcard.cards[0]; // Get the first card
+    final card = widget.flashcard.cards[0];
 
     return Scaffold(
       appBar: AppBar(
@@ -36,24 +60,21 @@ class _FlashcardDetailPageState extends State<FlashcardDetailPage> {
         backgroundColor: Colors.blueGrey,
       ),
       body: Center(
-        child: GestureDetector(
-          onTap: _toggleCard,
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            transitionBuilder: (child, animation) {
-              return RotationTransition(
-                turns: animation,
-                child: child,
-              );
-            },
-            child: _isFlipped
-                ? _BackOfCard(
-              backText: card.back,
-              hint: card.hint ?? 'No hint available',
-              example: card.example ?? 'No example available',
-            )
-                : _FrontOfCard(frontText: card.front),
-          ),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          transitionBuilder: (child, animation) {
+            return RotationTransition(
+              turns: animation,
+              child: child,
+            );
+          },
+          child: _isFlipped
+              ? _BackOfCard(
+            backText: card.back,
+            hint: card.hint ?? 'No hint available',
+            example: card.example ?? 'No example available',
+          )
+              : _FrontOfCard(frontText: card.front),
         ),
       ),
     );
